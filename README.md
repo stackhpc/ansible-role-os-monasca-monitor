@@ -1,6 +1,8 @@
 stackhpc.os-monasca-monitor
 ===========================
 
+[![Build Status](https://www.travis-ci.org/stackhpc/ansible-role-monasca-monitor.svg?branch=master)](https://www.travis-ci.org/stackhpc/ansible-role-os-monasca-monitor)
+
 This role deploys [Monasca Monitor](https://github.com/stackhpc/monasca-monitor)
 as a systemd service. It also configures alarms and notifications required for
 Monasca-Monitor to work. After running it you should have a Prometheus endpoint
