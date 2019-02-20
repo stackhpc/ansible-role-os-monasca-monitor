@@ -1,0 +1,10 @@
+[Unit]
+Description=Monasca Monitor metrics source
+PartOf=monasca-monitor.target
+
+[Service]
+ExecStart={{ monasca_monitor_virtualenv_dir }}/bin/mm-metric-source
+Type=simple
+
+[Install]
+WantedBy=default.target

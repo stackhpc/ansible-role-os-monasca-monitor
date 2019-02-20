@@ -1,0 +1,31 @@
+---
+monasca_monitor_virtualenv_dir: /opt/monasca-monitor
+monasca_monitor_git_repo: https://github.com/stackhpc/monasca-monitor.git
+monasca_monitor_branch: master
+
+# Heatbeat service settings
+monasca_monitor_bind_port: 8000
+monasca_monitor_bind_host: 0.0.0.0
+
+# Keystone auth for posting metrics
+monasca_monitor_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+monasca_monitor_user_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') or 'Default' }}"
+monasca_monitor_user_domain_id: "{{ lookup('env','OS_USER_DOMAIN_ID') }}"
+monasca_monitor_project_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
+monasca_monitor_project_domain_name: "{{ lookup('env','OS_PROJECT_DOMAIN_NAME') or 'Default' }}"
+monasca_monitor_project_id: "{{ lookup('env','OS_PROJECT_ID') }}"
+monasca_monitor_password: "{{ lookup('env','OS_PASSWORD') }}"
+monasca_monitor_username: "{{ lookup('env','OS_USERNAME') }}"
+monasca_monitor_auth_type: "{{ lookup('env','OS_AUTH_TYPE') or 'password' }}"
+monasca_monitor_region_name: "{{ lookup('env','OS_REGION_NAME') }}"
+
+# When a heartbeat alarm fires, this notification pings the heartbeat service
+monasca_notification:
+  name: 'monasca-monitor-heartbeat'
+  type: 'webhook'
+  url: 'http://127.0.0.1:{{ monasca_monitor_bind_port }}/heartbeat'
+
+# All alarms defined here are associated with monasca_notification
+monasca_alarms:
+    - { name: 'monasca-monitor-heartbeat', definition: 'sum(monascamonitor.heartbeat{}) >= 50' }
+

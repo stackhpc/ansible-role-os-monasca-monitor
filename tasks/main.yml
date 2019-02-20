@@ -1,0 +1,97 @@
+---
+- name: Pip install Monasca Monitor into a Python virtual env
+  pip:
+    name: "git+{{ monasca_monitor_git_repo }}@{{ monasca_monitor_branch }}"
+    virtualenv: "{{ monasca_monitor_virtualenv_dir }}"
+    editable: False
+  become: yes
+
+- name: Ensure Monasca Monitor config directory exists
+  file:
+      path: /etc/monasca-monitor
+      state: directory
+      owner: root
+      group: root
+      mode: 0700
+  become: yes
+
+- name: Generate Monasca Monitor config file
+  template:
+      src: monasca-monitor.conf.j2
+      dest: /etc/monasca-monitor/monasca-monitor.conf
+      owner: root
+      group: root
+      mode: 0600
+  become: yes
+
+- name: Create Monasca Monitor systemd target file
+  template:
+      src: "monasca-monitor.target.j2"
+      dest: "/etc/systemd/system/monasca-monitor.target"
+      owner: root
+      group: root
+      mode: 0644
+  become: yes
+
+- name: Ensure Monasca Monitor systemd .wants directory exists
+  file:
+      path: /etc/systemd/system/monasca-monitor.target.wants
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+  become: yes
+
+- name: Create Monasca Monitor systemd service files
+  template:
+      src: "{{ item }}.j2"
+      dest: "/etc/systemd/system/monasca-monitor.target.wants/{{ item }}"
+      owner: root
+      group: root
+      mode: 0644
+  with_items:
+      - monasca-monitor-heartbeat.service
+      - monasca-monitor-metric-source.service
+  become: yes
+
+- name: Start and enable Monasca Monitor service
+  systemd:
+      name: monasca-monitor.target
+      state: started
+      enabled: yes
+      daemon_reload: yes
+  become: yes
+
+- name: Install monasca-client into a Python virtualenv
+  pip:
+      name: python-monascaclient
+      state: latest
+      virtualenv: "{{ monasca_monitor_virtualenv_dir }}"
+
+- name: Generate list of configured notifications
+  command: "{{ monasca_monitor_virtualenv_dir }}/bin/monasca notification-list -j"
+  register: list_notifications_output
+  failed_when: "list_notifications_output.stderr | length > 1"
+  changed_when: False
+
+- name: Find notification ID for {{ monasca_notification.name }} notification if it exists
+  set_fact:
+      notification_id: "{{ list_notifications_output.stdout | from_json | json_query(\"[?name=='\" + monasca_notification.name + \"'].id\") | first | default(None) }}"
+
+- name: Define {{ monasca_notification.name }} notification
+  command: "{{ monasca_monitor_virtualenv_dir }}/bin/monasca notification-create {{ monasca_notification.name }} {{ monasca_notification.type }} {{ monasca_notification.url }}"
+  register: create_notification_output
+  failed_when: "create_notification_output.stderr | length > 1"
+  when: not notification_id
+
+- name: Extract notification ID from new notification
+  set_fact:
+      notification_id: "{{ (create_notification_output.stdout | from_json).id }}"
+  when: not notification_id
+
+- name: Create alarm definitions
+  command: "{{ monasca_monitor_virtualenv_dir }}/bin/monasca alarm-definition-create {{ item.name }} '{{ item.definition }}' --match-by hostname --alarm-actions {{ notification_id }}"
+  register: alarm_registration_output
+  failed_when: "alarm_registration_output.stderr | length > 1 and 'already exists' not in alarm_registration_output.stderr"
+  changed_when: "'already exists' not in alarm_registration_output.stderr"
+  with_items: "{{ monasca_alarms }}"
