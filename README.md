@@ -1,16 +1,20 @@
 stackhpc.os-monasca-monitor
 ===========================
 
-This role deploys Monasca-Monitor as a systemd service. It also configures
-alarms and notifications required for Monasca-Monitor to work.
+This role deploys [Monasca Monitor](https://github.com/stackhpc/monasca-monitor)
+as a systemd service. It also configures alarms and notifications required for
+Monasca-Monitor to work. After running it you should have a Prometheus endpoint
+which can be used to monitor the status of the Monasca alerting pipeline.
 
 Usage
 -----
 
-1. Source OpenStack credentials, for example ```$ source ~/public-openrc.sh```
+1. Source OpenStack credentials, for example:
+   ```$ source ~/public-openrc.sh```
 2. Create a playbook to run the role, overriding any defaults you need to,
    for example:
    ```
+   $ cat my_playbook.yml
    ---
    - name: Deploy Monasca Monitoring Sevice
      hosts: localhost
@@ -19,7 +23,7 @@ Usage
            monasca_monitor_bind_port: 8008
 
    ```
-3. Run the playbook:
+3. Run the playbook against the host where you want the monitor to run:
    ```
    $ ansible-playbook -i localhost my_playbook.yml
    ```
