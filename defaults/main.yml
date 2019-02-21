@@ -5,7 +5,7 @@ monasca_monitor_branch: master
 
 # Heatbeat service settings
 monasca_monitor_bind_port: 8000
-monasca_monitor_bind_host: 0.0.0.0
+monasca_monitor_bind_host: 127.0.0.1
 
 # Keystone auth for posting metrics
 monasca_monitor_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
@@ -23,7 +23,7 @@ monasca_monitor_region_name: "{{ lookup('env','OS_REGION_NAME') }}"
 monasca_notification:
   name: 'monasca-monitor-heartbeat'
   type: 'webhook'
-  url: 'http://127.0.0.1:{{ monasca_monitor_bind_port }}/heartbeat'
+  url: 'http://{{ monasca_monitor_bind_host }}:{{ monasca_monitor_bind_port }}/heartbeat'
 
 # All alarms defined here are associated with monasca_notification
 monasca_alarms:
