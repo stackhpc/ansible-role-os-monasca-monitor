@@ -76,16 +76,18 @@
   changed_when: False
   environment: "{{ monasca_monitor_auth_env }}"
 
+- name: Convert notification output to JSON
+  set_fact:
+      json_ids: "{{ list_notifications_output.stdout | from_json }}"
+
 - name: Find notification ID for {{ monasca_notification.name }} notification if it exists
   set_fact:
-      notification_id: >
-          "{{ list_notifications_output.stdout | from_json | json_query(\"[?name=='\"
-           + monasca_notification.name + \"'].id\") | first | default(None) }}"
+      notification_id: "{{ json_ids | json_query(\"[?name=='\" + monasca_notification.name + \"'].id\") | first | default(None) }}"
 
 - name: Define {{ monasca_notification.name }} notification
-  command: >
-          "{{ monasca_monitor_virtualenv_dir }}/bin/monasca notification-create
-           {{ monasca_notification.name }} {{ monasca_notification.type }} {{ monasca_notification.url }}"
+  command: >-
+      {{ monasca_monitor_virtualenv_dir }}/bin/monasca notification-create
+      {{ monasca_notification.name }} {{ monasca_notification.type }} {{ monasca_notification.url }}
   register: create_notification_output
   failed_when: "create_notification_output.stderr | length > 1"
   when: not notification_id
@@ -97,13 +99,13 @@
   when: not notification_id
 
 - name: Create alarm definitions
-  command: >
-          "{{ monasca_monitor_virtualenv_dir }}/bin/monasca alarm-definition-create
-           {{ item.name }} '{{ item.definition }}' --match-by hostname --alarm-actions {{ notification_id }}"
+  command: >-
+      {{ monasca_monitor_virtualenv_dir }}/bin/monasca alarm-definition-create
+      {{ item.name }} '{{ item.definition }}' --match-by hostname --alarm-actions {{ notification_id }}
   register: alarm_registration_output
-  failed_when: >
-          "alarm_registration_output.stderr | length > 1
-           and 'already exists' not in alarm_registration_output.stderr"
+  failed_when: >-
+      alarm_registration_output.stderr | length > 1
+      and 'already exists' not in alarm_registration_output.stderr
   changed_when: "'already exists' not in alarm_registration_output.stderr"
   with_items: "{{ monasca_alarms }}"
   environment: "{{ monasca_monitor_auth_env }}"
