@@ -49,4 +49,3 @@ monasca_notification:
 # All alarms defined here are associated with monasca_notification
 monasca_alarms:
     - { name: 'monasca-monitor-heartbeat', definition: 'sum(monascamonitor.heartbeat{}) >= 50' }
-

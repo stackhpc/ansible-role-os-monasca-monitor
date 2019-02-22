@@ -65,7 +65,8 @@
 - name: Install monasca-client into a Python virtualenv
   pip:
       name: python-monascaclient
-      state: latest
+      state: present
+      version: 1.13.0
       virtualenv: "{{ monasca_monitor_virtualenv_dir }}"
 
 - name: Generate list of configured notifications
@@ -100,7 +101,9 @@
           "{{ monasca_monitor_virtualenv_dir }}/bin/monasca alarm-definition-create
            {{ item.name }} '{{ item.definition }}' --match-by hostname --alarm-actions {{ notification_id }}"
   register: alarm_registration_output
-  failed_when: "alarm_registration_output.stderr | length > 1 and 'already exists' not in alarm_registration_output.stderr"
+  failed_when: >
+          "alarm_registration_output.stderr | length > 1
+           and 'already exists' not in alarm_registration_output.stderr"
   changed_when: "'already exists' not in alarm_registration_output.stderr"
   with_items: "{{ monasca_alarms }}"
   environment: "{{ monasca_monitor_auth_env }}"
