@@ -7,7 +7,8 @@ monasca_monitor_branch: master
 monasca_monitor_bind_port: 8000
 monasca_monitor_bind_host: 127.0.0.1
 
-# Keystone auth for posting metrics
+# Keystone auth settings for posting metrics and setting env vars. For convenience
+# these can be picked up from an OpenStack credentials file sourced locally.
 monasca_monitor_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
 monasca_monitor_user_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') or 'Default' }}"
 monasca_monitor_user_domain_id: "{{ lookup('env','OS_USER_DOMAIN_ID') }}"
@@ -18,6 +19,26 @@ monasca_monitor_password: "{{ lookup('env','OS_PASSWORD') }}"
 monasca_monitor_username: "{{ lookup('env','OS_USERNAME') }}"
 monasca_monitor_auth_type: "{{ lookup('env','OS_AUTH_TYPE') or 'password' }}"
 monasca_monitor_region_name: "{{ lookup('env','OS_REGION_NAME') }}"
+
+# Auth environment for Monasca client. At the very least you will want the
+# OpenStack project to match that set in the credentials above so that the
+# alarms will trigger. If the user posting metrics does not have permission
+# to create alarms and notifications you can use a user with those
+# privileges here. If you will use the same user to post metrics *and* create
+# alarms and notifications then you do not need to change this.
+monasca_monitor_auth_env:
+    OS_REGION_NAME: "{{ monasca_monitor_region_name }}"
+    OS_AUTH_PLUGIN: "{{ monasca_monitor_auth_type }}"
+    OS_PROJECT_NAME: "{{monasca_monitor_project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ monasca_monitor_user_domain_name }}"
+    OS_USER_DOMAIN_ID: "{{ monasca_monitor_user_domain_id }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ monasca_monitor_project_domain_name }}"
+    OS_PROJECT_ID: "{{ monasca_monitor_project_id }}"
+    OS_PASSWORD: "{{ monasca_monitor_password }}"
+    OS_AUTH_URL: "{{ monasca_monitor_auth_url }}"
+    OS_IDENTITY_API_VERSION: "3"
+    OS_USERNAME: "{{ monasca_monitor_username }}"
+    OS_INTERFACE: "public"
 
 # When a heartbeat alarm fires, this notification pings the heartbeat service
 monasca_notification:

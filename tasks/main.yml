@@ -73,6 +73,7 @@
   register: list_notifications_output
   failed_when: "list_notifications_output.stderr | length > 1"
   changed_when: False
+  environment: "{{ monasca_monitor_auth_env }}"
 
 - name: Find notification ID for {{ monasca_notification.name }} notification if it exists
   set_fact:
@@ -83,6 +84,7 @@
   register: create_notification_output
   failed_when: "create_notification_output.stderr | length > 1"
   when: not notification_id
+  environment: "{{ monasca_monitor_auth_env }}"
 
 - name: Extract notification ID from new notification
   set_fact:
@@ -95,3 +97,4 @@
   failed_when: "alarm_registration_output.stderr | length > 1 and 'already exists' not in alarm_registration_output.stderr"
   changed_when: "'already exists' not in alarm_registration_output.stderr"
   with_items: "{{ monasca_alarms }}"
+  environment: "{{ monasca_monitor_auth_env }}"
