@@ -1,3 +1,7 @@
+[monasca_client]
+endpoint_type = {{ monasca_monitor_endpoint_type }}
+region_name = {{ monasca_monitor_region_name }}
+
 [heartbeat]
 bind_port = {{ monasca_monitor_bind_port }}
 bind_host = {{ monasca_monitor_bind_host }}
@@ -12,4 +16,3 @@ project_id = {{ monasca_monitor_project_id }}
 password = {{ monasca_monitor_password }}
 username = {{ monasca_monitor_username }}
 auth_type = {{ monasca_monitor_auth_type }}
-region_name = {{ monasca_monitor_region_name }}
