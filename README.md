@@ -11,26 +11,46 @@ which can be used to monitor the status of the Monasca alerting pipeline.
 Usage
 -----
 
-1. Source OpenStack credentials, for example:
-   ```$ source ~/public-openrc.sh```
-2. Create a playbook to run the role, overriding any defaults you need to,
+#. Decide which OpenStack project you want the monitor to be associated with
+   and make sure that a user exists in that project, with the monasca user
+   role.
+#. Create a playbook to run the role, overriding any defaults you need to,
    for example:
    ```
    $ cat my_playbook.yml
    ---
-   - name: Deploy Monasca Monitoring Sevice
-     hosts: localhost
+   - name: Ensure Monasca Monitor is deployed
+     hosts: some-node-with-public-openstack-api-access
+     vars:
+       monasca_monitor_port: 8000
      roles:
-         - role: monasca-monitor
-           monasca_monitor_bind_port: 8008
-
+       - name: stackhpc.os_monasca_monitor
+         monasca_monitor_bind_port: "{{ monasca_monitor_port }}"
+         monasca_monitor_bind_host: "10.0.0.10"
+         monasca_monitor_auth_url: "http://{{ public_os_vip_address }}:5000"
+         monasca_monitor_project_name: "monasca-monitoring"
+         monasca_monitor_password: "{{ secrets_monasca_monitoring_password }}"
+         monasca_monitor_username: "monasca-monitor"
+         monasca_monitor_region_name: "RegionOne"
+         monasca_monitor_endpoint_type: "public"
+     tasks:
+       - name: Open port to allow ping-back from monasca notification service
+         iptables:
+           state: present
+           jump: ACCEPT
+           in_interface: enp0s1
+           chain: IN_public_allow
+           protocol: tcp
+           destination_port: "{{ monasca_monitor_port }}"
+           comment: Enable ping back to Monasca Metrics service.
+         become: yes
    ```
-3. Run the playbook against the host where you want the monitor to run:
+#. Run the playbook against the host where you want the monitor to run:
    ```
    $ ansible-playbook -i localhost my_playbook.yml
    ```
 
-4. Configure Prometheus to scrape the endpoint. By default this is bound to all
+#. Configure Prometheus to scrape the endpoint. By default this is bound to all
    interfaces on the host. The metric of interest is
    `monasca_monitor_heartbeat_total` which by default should increment every
    1 minute. The idea is to set an alarm in Prometheus to ensure that the counter
