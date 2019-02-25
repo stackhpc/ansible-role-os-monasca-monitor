@@ -3,3 +3,4 @@
   service:
     name: monasca-monitor.target
     state: restarted
+  become: yes
