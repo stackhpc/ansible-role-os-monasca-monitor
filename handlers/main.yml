@@ -1,0 +1,5 @@
+---
+- name: restart monasca monitor
+  service:
+    name: monasca-monitor.target
+    state: restarted

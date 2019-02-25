@@ -5,6 +5,8 @@
     virtualenv: "{{ monasca_monitor_virtualenv_dir }}"
     editable: False
   become: yes
+  notify:
+     - restart monasca monitor
 
 - name: Ensure Monasca Monitor config directory exists
   file:
@@ -23,6 +25,8 @@
       group: root
       mode: 0600
   become: yes
+  notify:
+     - restart monasca monitor
 
 - name: Create Monasca Monitor systemd target file
   template:
