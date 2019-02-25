@@ -11,10 +11,10 @@ which can be used to monitor the status of the Monasca alerting pipeline.
 Usage
 -----
 
-#. Decide which OpenStack project you want the monitor to be associated with
+1. Decide which OpenStack project you want the monitor to be associated with
    and make sure that a user exists in that project, with the monasca user
    role.
-#. Create a playbook to run the role, overriding any defaults you need to,
+2. Create a playbook to run the role, overriding any defaults you need to,
    for example:
    ```
    $ cat my_playbook.yml
@@ -45,12 +45,12 @@ Usage
            comment: Enable ping back to Monasca Metrics service.
          become: yes
    ```
-#. Run the playbook against the host where you want the monitor to run:
+3. Run the playbook against the host where you want the monitor to run:
    ```
    $ ansible-playbook -i localhost my_playbook.yml
    ```
 
-#. Configure Prometheus to scrape the endpoint. By default this is bound to all
+4. Configure Prometheus to scrape the endpoint. By default this is bound to all
    interfaces on the host. The metric of interest is
    `monasca_monitor_heartbeat_total` which by default should increment every
    1 minute. The idea is to set an alarm in Prometheus to ensure that the counter
