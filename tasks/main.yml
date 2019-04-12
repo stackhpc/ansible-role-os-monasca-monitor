@@ -72,6 +72,7 @@
       state: present
       version: 1.13.0
       virtualenv: "{{ monasca_monitor_virtualenv_dir }}"
+  become: yes
 
 - name: Generate list of configured notifications
   command: "{{ monasca_monitor_virtualenv_dir }}/bin/monasca notification-list -j"
