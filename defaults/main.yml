@@ -19,6 +19,8 @@ monasca_monitor_password: "{{ lookup('env','OS_PASSWORD') }}"
 monasca_monitor_username: "{{ lookup('env','OS_USERNAME') }}"
 monasca_monitor_auth_type: "{{ lookup('env','OS_AUTH_TYPE') or 'password' }}"
 monasca_monitor_region_name: "{{ lookup('env','OS_REGION_NAME') }}"
+monasca_monitor_cacert: "{{ lookup('env','OS_CACERT') }}"
+monasca_monitor_insecure: "{{ lookup('env','OS_INSECURE') or 'False' }}"
 
 # Auth environment for Monasca client. At the very least you will want the
 # OpenStack project to match that set in the credentials above so that the
