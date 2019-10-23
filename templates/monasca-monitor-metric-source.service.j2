@@ -5,6 +5,8 @@ PartOf=monasca-monitor.target
 [Service]
 ExecStart={{ monasca_monitor_virtualenv_dir }}/bin/mm-metric-source
 Type=simple
+Restart=on-failure
+RestartSec={{ monasca_monitor_restart_sec }}
 
 [Install]
 WantedBy=default.target
