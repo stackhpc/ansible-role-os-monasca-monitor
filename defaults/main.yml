@@ -7,6 +7,10 @@ monasca_monitor_branch: master
 monasca_monitor_bind_port: 8000
 monasca_monitor_bind_host: 127.0.0.1
 
+# Systemd restart settings
+# Restart failed metric source service every 30 seconds
+monasca_monitor_restart_sec: 30
+
 # Keystone auth settings for posting metrics and setting env vars. For convenience
 # these can be picked up from an OpenStack credentials file sourced locally.
 monasca_monitor_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
